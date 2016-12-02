@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>惯性拖拽</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0,user-scalable=no" id="viewport" />
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+		}
+		div{
+			width: 100%;
+			border: 1px solid red;
+			overflow: hidden;
+		}
+		div ul{
+			list-style: none;
+			width: 7000px;
+		}
+		div ul li{
+			float: left;
+			margin-right: 10px;
+		}
+	</style>
+</head>
+<body>
+	<div id="box">
+		<ul id="unit">
+			<li><img src="images/1.jpg" alt=""></li>
+			<li><img src="images/2.jpg" alt=""></li>
+			<li><img src="images/3.jpg" alt=""></li>
+			<li><img src="images/4.jpg" alt=""></li>
+			<li><img src="images/5.jpg" alt=""></li>
+			<li><img src="images/6.jpg" alt=""></li>
+			<li><img src="images/7.jpg" alt=""></li>
+		</ul>
+	</div>
+
+	<script type="text/javascript">
+		var box = document.getElementById("box");
+		var unit = document.getElementById("unit");
+		//最后一个点的位置
+		var lastpoint = 0;
+		//最后两个点的距离
+		var d = 0;
+		//开始触摸的坐标
+		var startX;
+		//信号量，当前的translateX的值
+		var nowtranslateX = 0;
+		//临时周边用的变量
+		var temp;
+
+		var w = document.documentElement.clientWidth;
+
+		//开始触摸
+		box.addEventListener("touchstart",function(event){
+			event.preventDefault();
+			var finger = event.touches[0];
+			//记录开始坐标
+			startX = finger.clientX;
+		},true);
+
+		box.addEventListener("touchmove", function(event){
+			var finger = event.touches[0];
+			//去掉过渡
+			unit.style.transition = "none";
+			//记录最后两个点的距离
+			d = finger.clientX - lastpoint;
+			lastpoint = finger.clientX;
+			//变形
+			var dX = finger.clientX - startX;
+			//临时变量，此时是信号量加上dX：
+			temp = nowtranslateX + dX;
+			//设置火车的位置
+			unit.style.transform = "translateX(" + temp + "px)";
+		}, true);
+
+		//结束触摸
+		box.addEventListener("touchend",function(event){
+			var finger = event.touches[0];
+			//设置信号量
+			nowtranslateX = temp;
+			//设置一个目标值
+			var target = nowtranslateX + 5 * d;
+
+			console.log("我到了" + nowtranslateX + "但是我不满意，我还要运动到" + target);
+
+			//根据情况设置transition，增加回弹效果
+			if(target > 0){
+				unit.style.transition = "all 0.6s cubic-bezier(.34,1.81,.51,1.68) 0s";
+				target = 0;
+			}else if(target < -330 * 7 + 10 + w){
+				unit.style.transition = "all 0.6s cubic-bezier(.34,1.81,.51,1.68) 0s";
+				target = -330 * 7 + 10 + w;
+			}else{
+				//设置过渡，然后让元素往目标冲锋即可
+				unit.style.transition = "all 0.6s cubic-bezier(0.2, 1.05, 0.58, 1.01) 0s";
+			}
+			//移动
+			unit.style.transform = "translateX(" + target + "px)";
+
+			nowtranslateX = target;
+			
+		},true);
+	</script>
+</body>
+</html>
